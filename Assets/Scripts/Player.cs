@@ -13,7 +13,16 @@ public class Player : MonoBehaviour
     private float speed = 8f;
     private float jumpingPower = 16f;
     private bool isFacingRight = true;
+    private bool isJumped = false;
 
+    private readonly float coyoteTime = 0.2f;
+    private float coyoteTimeCnt;
+
+
+    void Update()
+    {
+        CoyoteTime();
+    }
 
     void FixedUpdate()
     {
@@ -22,9 +31,23 @@ public class Player : MonoBehaviour
     }
 
 
+    private void CoyoteTime()
+    {
+        if (IsGrounded())
+        {
+            coyoteTimeCnt = coyoteTime;
+        }
+
+        else
+        {
+            coyoteTimeCnt -= Time.deltaTime;
+        }
+    }
+
+
     public void Jump(InputAction.CallbackContext context)
     {
-        if (context.performed && IsGrounded())
+        if (context.performed && coyoteTimeCnt > 0f)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
         }
@@ -32,6 +55,8 @@ public class Player : MonoBehaviour
         if (context.canceled && rb.velocity.y > 0f)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpingPower * 0.5f);
+
+            coyoteTimeCnt = 0f;
         }
     }
 
