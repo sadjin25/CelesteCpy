@@ -21,12 +21,12 @@ public class Player : MonoBehaviour
     private float direction;
     private float jumpForce = 10f;
     private bool isFacingRight = true;
-    public bool isGrounded;
+    private bool isGrounded;
 
-    [SerializeField] public float jumpTime = 0.15f;
-    [SerializeField] public float jumpTimeCnt;
-    public bool isPressedJump;
-    public bool isJumped;
+    [SerializeField] private float jumpTime = 0.15f;
+    private float jumpTimeCnt;
+    private bool isPressedJump;
+    private bool isJumped;
 
     public int MelonCnt;
 
@@ -137,6 +137,11 @@ public class Player : MonoBehaviour
     private void GroundChk()
     {
         isGrounded = Physics2D.OverlapCircle(groundChkr.position, 0.2f, groundLayer);
+
+        if (isGrounded)
+        {
+            isJumped = false;
+        }
     }
 
     private void Flip()
