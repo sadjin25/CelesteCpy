@@ -10,6 +10,13 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform groundChkr;
     [SerializeField] private LayerMask groundLayer;
 
+    private enum SpriteState
+    {
+        // Start with 0
+        idle, running, jumping, falling
+    }
+    private SpriteState State = SpriteState.idle;
+
     private float direction;
     private float maxSpeed = 10f;
     private float jumpForce = 16f;
@@ -31,13 +38,44 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.velocity = new Vector2(direction * maxSpeed, rb.velocity.y);
+        Movement();
     }
 
 
+    private void Movement()
+    {
+        //Running
+        rb.velocity = new Vector2(direction * maxSpeed, rb.velocity.y);
+
+    }
+
     private void AnimTransition()
     {
-        anim.SetBool("Running", direction != 0);
+        //BUG : while in idle state, it doesn't instantly changed to jumping state. 
+        // Running
+        if (Mathf.Abs(direction) > 0f)
+        {
+            State = SpriteState.running;
+        }
+        // Idle
+        else
+        {
+            State = SpriteState.idle;
+        }
+
+        // Jumping
+        if (rb.velocity.y > 0.1f)
+        {
+            State = SpriteState.jumping;
+        }
+
+        // Falling
+        else if (rb.velocity.y < -0.1f)
+        {
+            State = SpriteState.falling;
+        }
+
+        anim.SetInteger("State", (int)State);
     }
 
 

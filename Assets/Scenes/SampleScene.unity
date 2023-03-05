@@ -1824,6 +1824,7 @@ GameObject:
   - component: {fileID: 742930169}
   - component: {fileID: 742930173}
   - component: {fileID: 742930174}
+  - component: {fileID: 742930175}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1844,18 +1845,18 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.022940159, y: -0.21219707}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 2, y: 2}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.3211632, y: 1.5599837}
   m_EdgeRadius: 0
 --- !u!50 &742930170
 Rigidbody2D:
@@ -1919,8 +1920,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0.56976867, b: 0, a: 1}
+  m_Sprite: {fileID: -6367560908665664636, guid: d348dff3819df794186a80cb95777629, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -2068,12 +2069,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30c48e17119331049b09d2dc88ba3cac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rb: {fileID: 742930170}
   groundChkr: {fileID: 177916965}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  isGrounded: 0
+--- !u!95 &742930175
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 742930168}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 24e336e194300ed418df8b35e1e6b91f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &873542275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2297,7 +2317,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1853461421
 Transform:
   m_ObjectHideFlags: 0
