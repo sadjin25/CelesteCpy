@@ -4,7 +4,6 @@ using UnityEngine;
 
 public abstract class Collectible : MonoBehaviour
 {
-    public abstract void Pickup();
-    public abstract void Destroy();
+    public abstract void Pickup(Player player);
 
 }

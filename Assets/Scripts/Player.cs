@@ -28,7 +28,7 @@ public class Player : MonoBehaviour
     public bool isPressedJump;
     public bool isJumped;
 
-    private int MelonCnt;
+    public int MelonCnt;
 
     void Start()
     {
@@ -158,11 +158,9 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
-        if (collider.gameObject.CompareTag("Melon"))
-        {
-            Destroy(collider.gameObject);
-            GetMelon();
-        }
+        Collectible pickupItem = collider.GetComponent<Collectible>();
+
+        pickupItem.Pickup(gameObject.GetComponent<Player>());
     }
 
 }

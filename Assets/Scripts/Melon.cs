@@ -8,14 +8,10 @@ public class Melon : Collectible
     private readonly float length = 0.5f;
     private Vector2 firstPos;
 
-    public override void Pickup()
+    public override void Pickup(Player player)
     {
-
-    }
-
-    public override void Destroy()
-    {
-
+        player.GetMelon();
+        Destroy(gameObject);
     }
 
     private void Start()
