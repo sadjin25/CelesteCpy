@@ -19,11 +19,11 @@ public class Player : MonoBehaviour
 
     private readonly float maxSpeed = 10f;
     private float direction;
-    private float jumpForce = 8f;
+    private float jumpForce = 10f;
     private bool isFacingRight = true;
     public bool isGrounded;
 
-    [SerializeField] public float jumpTime = 0.2f;
+    [SerializeField] public float jumpTime = 0.15f;
     [SerializeField] public float jumpTimeCnt;
     public bool isPressedJump;
     public bool isJumped;
@@ -113,6 +113,8 @@ public class Player : MonoBehaviour
 
     public void GetInputJump(InputAction.CallbackContext context)
     {
+        // BUG : It doesn't immediately change the value like FixedUpdate() << Infinity Jump!
+
         if (context.performed)
         {
             isPressedJump = true;
