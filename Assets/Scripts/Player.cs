@@ -6,24 +6,27 @@ using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {
     private Rigidbody2D rb;
+    private Animator anim;
     [SerializeField] private Transform groundChkr;
     [SerializeField] private LayerMask groundLayer;
 
     private float direction;
     private float maxSpeed = 10f;
-    private float jumpingPower = 16f;
+    private float jumpForce = 16f;
     private bool isFacingRight = true;
-    public bool isGrounded;
+    private bool isGrounded;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
     }
 
     void Update()
     {
         GroundChk();
         Flip();
+        AnimTransition();
     }
 
     void FixedUpdate()
@@ -32,6 +35,10 @@ public class Player : MonoBehaviour
     }
 
 
+    private void AnimTransition()
+    {
+        anim.SetBool("Running", direction != 0);
+    }
 
 
     public void Jump(InputAction.CallbackContext context)
@@ -40,13 +47,13 @@ public class Player : MonoBehaviour
         {
             isGrounded = false;
 
-            rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
 
         //BUG : while goes up, we release the button again n again, it goes up by jumppower * 0.5f.
         if (context.canceled && rb.velocity.y > 0)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpingPower * 0.5f);
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce * 0.5f);
         }
     }
 
