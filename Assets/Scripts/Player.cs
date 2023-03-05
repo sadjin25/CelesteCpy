@@ -17,11 +17,16 @@ public class Player : MonoBehaviour
     }
     private SpriteState State = SpriteState.idle;
 
+    private readonly float maxSpeed = 10f;
     private float direction;
-    private float maxSpeed = 10f;
-    private float jumpForce = 16f;
+    private float jumpForce = 8f;
     private bool isFacingRight = true;
-    private bool isGrounded;
+    public bool isGrounded;
+
+    [SerializeField] public float jumpTime = 0.2f;
+    [SerializeField] public float jumpTimeCnt;
+    public bool isPressedJump;
+    public bool isJumped;
 
     void Start()
     {
@@ -31,6 +36,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        JumpChk();
         GroundChk();
         Flip();
         AnimTransition();
@@ -42,9 +48,35 @@ public class Player : MonoBehaviour
     }
 
 
+    private void JumpChk()
+    {
+        // Jumping
+        // TODO     : movement should be in FixedUpdate()
+        // TODO2    : Player is kinda floating in the air. need to fix gravity.
+        if (isPressedJump && isGrounded)
+        {
+            isJumped = true;
+            jumpTimeCnt = jumpTime;
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
+
+        if (isPressedJump && isJumped)
+        {
+            if (jumpTimeCnt > 0)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                jumpTimeCnt -= Time.deltaTime;
+            }
+            else
+            {
+                isJumped = false;
+            }
+        }
+    }
+
     private void Movement()
     {
-        //Running
+        // Running
         rb.velocity = new Vector2(direction * maxSpeed, rb.velocity.y);
 
     }
@@ -79,24 +111,23 @@ public class Player : MonoBehaviour
     }
 
 
-    public void Jump(InputAction.CallbackContext context)
+    public void GetInputJump(InputAction.CallbackContext context)
     {
-        if (context.performed && isGrounded)
+        if (context.performed)
         {
-            isGrounded = false;
-
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            isPressedJump = true;
         }
 
-        //BUG : while goes up, we release the button again n again, it goes up by jumppower * 0.5f.
-        if (context.canceled && rb.velocity.y > 0)
+        if (context.canceled)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce * 0.5f);
+            isPressedJump = false;
         }
     }
 
+
     private void GroundChk()
     {
+
         isGrounded = Physics2D.OverlapCircle(groundChkr.position, 0.2f, groundLayer);
     }
 
