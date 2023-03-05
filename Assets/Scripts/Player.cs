@@ -28,6 +28,8 @@ public class Player : MonoBehaviour
     public bool isPressedJump;
     public bool isJumped;
 
+    private int MelonCnt;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -47,6 +49,11 @@ public class Player : MonoBehaviour
         Movement();
     }
 
+
+    public void GetMelon()
+    {
+        MelonCnt++;
+    }
 
     private void JumpChk()
     {
@@ -95,13 +102,13 @@ public class Player : MonoBehaviour
             State = SpriteState.idle;
         }
 
-        // Jumping
+        // Jumping, fixing float err
         if (rb.velocity.y > 0.1f)
         {
             State = SpriteState.jumping;
         }
 
-        // Falling
+        // Falling, fixing float err
         else if (rb.velocity.y < -0.1f)
         {
             State = SpriteState.falling;
@@ -129,7 +136,6 @@ public class Player : MonoBehaviour
 
     private void GroundChk()
     {
-
         isGrounded = Physics2D.OverlapCircle(groundChkr.position, 0.2f, groundLayer);
     }
 
@@ -148,6 +154,15 @@ public class Player : MonoBehaviour
     public void GetInputDirection(InputAction.CallbackContext context)
     {
         direction = context.ReadValue<Vector2>().x;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        if (collider.gameObject.CompareTag("Melon"))
+        {
+            Destroy(collider.gameObject);
+            GetMelon();
+        }
     }
 
 }
