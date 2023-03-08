@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class Player : MonoBehaviour
     private enum SpriteState
     {
         // Start with 0
-        idle, running, jumping, falling
+        idle, running, jumping, falling, dead
     }
     private SpriteState State = SpriteState.idle;
 
@@ -28,6 +29,9 @@ public class Player : MonoBehaviour
     private bool isPressedJump;
     private bool isJumped;
 
+    public bool isDead = false;
+    public bool isGameOver = false;
+
     public int MelonCnt;
 
     void Start()
@@ -38,21 +42,50 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        JumpChk();
-        GroundChk();
-        Flip();
+        DeadChk();
         AnimTransition();
+        if (!isDead)
+        {
+            JumpChk();
+            GroundChk();
+            Flip();
+        }
     }
 
     void FixedUpdate()
     {
-        Movement();
+        if (!isDead)
+        {
+            Movement();
+            FollowerMovement();
+        }
     }
 
+    private void FollowerMovement()
+    {
+
+    }
 
     public void GetMelon()
     {
         MelonCnt++;
+    }
+
+    private void DeadChk()
+    {
+        if (isDead && !isGameOver)
+        {
+            rb.velocity = Vector2.zero;
+            isGameOver = true;
+            // TODO : make game manager, and load scene func goes in here.
+            StartCoroutine(LoadNewScene());
+        }
+    }
+
+    private IEnumerator LoadNewScene()
+    {
+        yield return new WaitForSeconds(2);
+        SceneManager.LoadScene("basicScene1");
     }
 
     private void JumpChk()
@@ -90,7 +123,6 @@ public class Player : MonoBehaviour
 
     private void AnimTransition()
     {
-        //BUG : while in idle state, it doesn't instantly changed to jumping state. 
         // Running
         if (Mathf.Abs(direction) > 0f)
         {
@@ -112,6 +144,11 @@ public class Player : MonoBehaviour
         else if (rb.velocity.y < -0.1f)
         {
             State = SpriteState.falling;
+        }
+
+        if (isDead)
+        {
+            State = SpriteState.dead;
         }
 
         anim.SetInteger("State", (int)State);
@@ -163,9 +200,16 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
-        Collectible pickupItem = collider.GetComponent<Collectible>();
+        if (collider.gameObject.CompareTag("Collectible"))
+        {
+            Collectible pickupItem = collider.GetComponent<Collectible>();
+            pickupItem.Pickup(gameObject.GetComponent<Player>());
+        }
 
-        pickupItem.Pickup(gameObject.GetComponent<Player>());
+        else if (collider.gameObject.CompareTag("Trap"))
+        {
+            isDead = true;
+        }
     }
 
 }
