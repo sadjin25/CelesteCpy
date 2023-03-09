@@ -11,6 +11,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform groundChkr;
     [SerializeField] private LayerMask groundLayer;
 
+    [SerializeField] private Transform wallChkr;
+
     private enum SpriteState
     {
         // Start with 0
@@ -18,10 +20,17 @@ public class Player : MonoBehaviour
     }
     private SpriteState State = SpriteState.idle;
 
-    private float direction;
+    private float xDirection;
+    private float yDirection;
     private bool isFacingRight = true;
 
     private bool isGrounded;
+
+    private bool isWallGrabbed;
+    private short grabbedDirection;
+    private float stamina;
+    private readonly float maxClimbSpeed = 4f;
+    private readonly float climbJumpStamina = 1.5f;
 
     private readonly float maxSpeed = 10f;
     private readonly float jumpTime = 0.15f;
@@ -47,9 +56,14 @@ public class Player : MonoBehaviour
         AnimTransition();
         if (!isDead)
         {
-            JumpAndFallChk();
             GroundChk();
-            Flip();
+            WallChk();
+            JumpAndFallChk();
+
+            if (!isWallGrabbed)
+            {
+                Flip();
+            }
         }
     }
 
@@ -95,33 +109,63 @@ public class Player : MonoBehaviour
         // TODO     : movement should be in FixedUpdate()
         // TODO     : add half grav threshold at the top of jump.
 
-        if (rb.velocity.y < 0 && !isGrounded)
+        if (!isWallGrabbed)
         {
-            rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
+            if (rb.velocity.y < 0 && !isGrounded)
+            {
+                rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
+            }
+
+            if (isPressedJump && isGrounded)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce); ;
+            }
+
+            if (!isPressedJump && rb.velocity.y > 0)
+            {
+                rb.velocity += Vector2.up * Physics2D.gravity.y * lowJumpMult * Time.deltaTime;
+            }
         }
 
-        if (isPressedJump && isGrounded)
+        else if (isWallGrabbed)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce); ;
-        }
+            if (isPressedJump)
+            {
+                if (xDirection == grabbedDirection)
+                {
+                    stamina -= climbJumpStamina;
+                    rb.velocity = new Vector2(0f, jumpForce);
+                }
 
-        if (!isPressedJump && rb.velocity.y > 0)
-        {
-            rb.velocity += Vector2.up * Physics2D.gravity.y * lowJumpMult * Time.deltaTime;
+                else
+                {
+                    isWallGrabbed = false;
+                    rb.velocity = new Vector2(xDirection * maxSpeed, jumpForce);
+                }
+            }
         }
     }
 
     private void Movement()
     {
         // Running
-        rb.velocity = new Vector2(direction * maxSpeed, rb.velocity.y);
+        if (!isWallGrabbed)
+        {
+            rb.velocity = new Vector2(xDirection * maxSpeed, rb.velocity.y);
+        }
+
+        // Grabbing Wall
+        if (isWallGrabbed)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, yDirection * maxClimbSpeed);
+        }
 
     }
 
     private void AnimTransition()
     {
         // Running
-        if (Mathf.Abs(direction) > 0f)
+        if (Mathf.Abs(xDirection) > 0f)
         {
             State = SpriteState.running;
         }
@@ -154,7 +198,7 @@ public class Player : MonoBehaviour
 
     public void GetInputJump(InputAction.CallbackContext context)
     {
-        // BUG : It doesn't immediately change the value like FixedUpdate() << Infinity Jump!
+        // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
 
         if (context.performed)
         {
@@ -171,11 +215,43 @@ public class Player : MonoBehaviour
     private void GroundChk()
     {
         isGrounded = Physics2D.OverlapCircle(groundChkr.position, 0.2f, groundLayer);
+
+        if (isGrounded)
+        {
+            // can hold wall for (x)f seconds.
+            stamina = 7f;
+        }
+    }
+
+    private void WallChk()
+    {
+        isWallGrabbed = Physics2D.OverlapCircle(wallChkr.position, 0.2f, groundLayer);
+
+        if (isWallGrabbed)
+        {
+            // When Player Grab the wall first
+            if (grabbedDirection == 0)
+            {
+                grabbedDirection = (short)xDirection;
+                rb.velocity = Vector2.zero;
+            }
+
+            stamina -= Time.deltaTime;
+        }
+        else
+        {
+            grabbedDirection = 0;
+        }
+
+        if (stamina <= 0)
+        {
+            isWallGrabbed = false;
+        }
     }
 
     private void Flip()
     {
-        if (!isFacingRight && direction > 0f || isFacingRight && direction < 0f)
+        if (!isFacingRight && xDirection > 0f || isFacingRight && xDirection < 0f)
         {
             isFacingRight = !isFacingRight;
 
@@ -187,7 +263,8 @@ public class Player : MonoBehaviour
 
     public void GetInputDirection(InputAction.CallbackContext context)
     {
-        direction = context.ReadValue<Vector2>().x;
+        xDirection = context.ReadValue<Vector2>().x;
+        yDirection = context.ReadValue<Vector2>().y;
     }
 
     private void OnTriggerEnter2D(Collider2D collider)
