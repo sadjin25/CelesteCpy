@@ -18,16 +18,17 @@ public class Player : MonoBehaviour
     }
     private SpriteState State = SpriteState.idle;
 
-    private readonly float maxSpeed = 10f;
     private float direction;
-    private float jumpForce = 10f;
     private bool isFacingRight = true;
+
     private bool isGrounded;
 
-    [SerializeField] private float jumpTime = 0.15f;
-    private float jumpTimeCnt;
+    private readonly float maxSpeed = 10f;
+    private readonly float jumpTime = 0.15f;
+    public float gravityMult = 1.5f;
+    public float lowJumpMult = 1.5f;
+    private float jumpForce = 14f;
     private bool isPressedJump;
-    private bool isJumped;
 
     public bool isDead = false;
     public bool isGameOver = false;
@@ -46,7 +47,7 @@ public class Player : MonoBehaviour
         AnimTransition();
         if (!isDead)
         {
-            JumpChk();
+            JumpAndFallChk();
             GroundChk();
             Flip();
         }
@@ -84,33 +85,29 @@ public class Player : MonoBehaviour
 
     private IEnumerator LoadNewScene()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1);
         SceneManager.LoadScene("basicScene1");
     }
 
-    private void JumpChk()
+    private void JumpAndFallChk()
     {
         // Jumping
         // TODO     : movement should be in FixedUpdate()
-        // TODO2    : Player is kinda floating in the air. need to fix gravity.
-        if (isPressedJump && isGrounded)
+        // TODO     : add half grav threshold at the top of jump.
+
+        if (rb.velocity.y < 0 && !isGrounded)
         {
-            isJumped = true;
-            jumpTimeCnt = jumpTime;
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
         }
 
-        if (isPressedJump && isJumped)
+        if (isPressedJump && isGrounded)
         {
-            if (jumpTimeCnt > 0)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-                jumpTimeCnt -= Time.deltaTime;
-            }
-            else
-            {
-                isJumped = false;
-            }
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce); ;
+        }
+
+        if (!isPressedJump && rb.velocity.y > 0)
+        {
+            rb.velocity += Vector2.up * Physics2D.gravity.y * lowJumpMult * Time.deltaTime;
         }
     }
 
@@ -174,11 +171,6 @@ public class Player : MonoBehaviour
     private void GroundChk()
     {
         isGrounded = Physics2D.OverlapCircle(groundChkr.position, 0.2f, groundLayer);
-
-        if (isGrounded)
-        {
-            isJumped = false;
-        }
     }
 
     private void Flip()
