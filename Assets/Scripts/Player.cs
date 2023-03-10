@@ -28,19 +28,23 @@ public class Player : MonoBehaviour
 
     private bool isWallGrabbed;
     private short grabbedDirection;
-    private float stamina;
-    private readonly float maxClimbSpeed = 4f;
+    public float stamina;
+    private readonly float maxStamina = 7f;
+    private readonly float maxClimbSpeed = 3f;
     private readonly float climbJumpStamina = 1.5f;
+    private readonly float minStaminaToClimbJump = 2f;
 
     private readonly float maxSpeed = 10f;
     private readonly float jumpTime = 0.15f;
-    public float gravityMult = 1.5f;
-    public float lowJumpMult = 1.5f;
+    // DANGER : This is NOT a READ ONLY.
+    private float playerDefaultGravity;
+    private float gravityMult = 1.5f;
+    private float lowJumpMult = 1.5f;
     private float jumpForce = 14f;
     private bool isPressedJump;
 
-    public bool isDead = false;
-    public bool isGameOver = false;
+    private bool isDead = false;
+    private bool isGameOver = false;
 
     public int MelonCnt;
 
@@ -48,6 +52,7 @@ public class Player : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        playerDefaultGravity = rb.gravityScale;
     }
 
     void Update()
@@ -131,9 +136,10 @@ public class Player : MonoBehaviour
         {
             if (isPressedJump)
             {
-                if (xDirection == grabbedDirection)
+                if (xDirection == grabbedDirection && stamina >= minStaminaToClimbJump)
                 {
                     stamina -= climbJumpStamina;
+                    // BUG :Player is Sliding, not Jump!
                     rb.velocity = new Vector2(0f, jumpForce);
                 }
 
@@ -158,6 +164,10 @@ public class Player : MonoBehaviour
         if (isWallGrabbed)
         {
             rb.velocity = new Vector2(rb.velocity.x, yDirection * maxClimbSpeed);
+            if (yDirection > 0 || yDirection < 0)
+            {
+                stamina -= Time.deltaTime;
+            }
         }
 
     }
@@ -165,7 +175,7 @@ public class Player : MonoBehaviour
     private void AnimTransition()
     {
         // Running
-        if (Mathf.Abs(xDirection) > 0f)
+        if (xDirection > 0 || xDirection < 0)
         {
             State = SpriteState.running;
         }
@@ -175,14 +185,14 @@ public class Player : MonoBehaviour
             State = SpriteState.idle;
         }
 
-        // Jumping, fixing float err
-        if (rb.velocity.y > 0.1f)
+        // Jumping
+        if (IsJumping())
         {
             State = SpriteState.jumping;
         }
 
-        // Falling, fixing float err
-        else if (rb.velocity.y < -0.1f)
+        // Falling
+        else if (IsFalling())
         {
             State = SpriteState.falling;
         }
@@ -227,8 +237,14 @@ public class Player : MonoBehaviour
     {
         isWallGrabbed = Physics2D.OverlapCircle(wallChkr.position, 0.2f, groundLayer);
 
-        if (isWallGrabbed)
+        if (stamina <= 0)
         {
+            isWallGrabbed = false;
+        }
+
+        if (isWallGrabbed && (IsJumping() || IsFalling()))
+        {
+            rb.gravityScale = 0f;
             // When Player Grab the wall first
             if (grabbedDirection == 0)
             {
@@ -241,12 +257,18 @@ public class Player : MonoBehaviour
         else
         {
             grabbedDirection = 0;
+            rb.gravityScale = playerDefaultGravity;
         }
+    }
 
-        if (stamina <= 0)
-        {
-            isWallGrabbed = false;
-        }
+    private bool IsJumping()
+    {
+        return rb.velocity.y > 0.1f;
+    }
+
+    private bool IsFalling()
+    {
+        return !isGrounded && rb.velocity.y < -0.1f;
     }
 
     private void Flip()
