@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     private bool isWallGrabbed;
     private short grabbedDirection;
     public float stamina;
+    public float staminaMinusMult = 1f;
     private readonly float maxStamina = 7f;
     private readonly float maxClimbSpeed = 3f;
     private readonly float climbJumpStamina = 1.5f;
@@ -36,6 +37,8 @@ public class Player : MonoBehaviour
 
     private readonly float maxSpeed = 10f;
     private readonly float jumpTime = 0.15f;
+    private readonly float noControlTime = 0.15f;
+    public float noControlTimeCnt;
     // DANGER : This is NOT a READ ONLY.
     private float playerDefaultGravity;
     private float gravityMult = 1.5f;
@@ -64,6 +67,8 @@ public class Player : MonoBehaviour
             GroundChk();
             WallChk();
             JumpAndFallChk();
+            StaminaControl();
+            NoControlTimeControl();
 
             if (!isWallGrabbed)
             {
@@ -77,14 +82,9 @@ public class Player : MonoBehaviour
         if (!isDead)
         {
             Movement();
-            FollowerMovement();
         }
     }
 
-    private void FollowerMovement()
-    {
-
-    }
 
     public void GetMelon()
     {
@@ -111,8 +111,8 @@ public class Player : MonoBehaviour
     private void JumpAndFallChk()
     {
         // Jumping
-        // TODO     : movement should be in FixedUpdate()
         // TODO     : add half grav threshold at the top of jump.
+        // TODO     : seperate jump / fall(or grav) control
 
         if (!isWallGrabbed)
         {
@@ -136,10 +136,13 @@ public class Player : MonoBehaviour
         {
             if (isPressedJump)
             {
+                // Can't control the player until it passes 'noControlTime'
+                noControlTimeCnt = noControlTime;
+
                 if (xDirection == grabbedDirection && stamina >= minStaminaToClimbJump)
                 {
                     stamina -= climbJumpStamina;
-                    // BUG :Player is Sliding, not Jump!
+
                     rb.velocity = new Vector2(0f, jumpForce);
                 }
 
@@ -154,6 +157,11 @@ public class Player : MonoBehaviour
 
     private void Movement()
     {
+        if (noControlTimeCnt > 0f)
+        {
+            noControlTimeCnt -= Time.deltaTime;
+        }
+
         // Running
         if (!isWallGrabbed)
         {
@@ -166,7 +174,11 @@ public class Player : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, yDirection * maxClimbSpeed);
             if (yDirection > 0 || yDirection < 0)
             {
-                stamina -= Time.deltaTime;
+                staminaMinusMult = 2f;
+            }
+            else
+            {
+                staminaMinusMult = 1f;
             }
         }
 
@@ -206,21 +218,6 @@ public class Player : MonoBehaviour
     }
 
 
-    public void GetInputJump(InputAction.CallbackContext context)
-    {
-        // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
-
-        if (context.performed)
-        {
-            isPressedJump = true;
-        }
-
-        if (context.canceled)
-        {
-            isPressedJump = false;
-        }
-    }
-
 
     private void GroundChk()
     {
@@ -235,29 +232,52 @@ public class Player : MonoBehaviour
 
     private void WallChk()
     {
+        // BUG : Player hold the wall while standing on the ground.
         isWallGrabbed = Physics2D.OverlapCircle(wallChkr.position, 0.2f, groundLayer);
 
-        if (stamina <= 0)
+        if (stamina <= 0 || isGrounded)
         {
             isWallGrabbed = false;
         }
 
-        if (isWallGrabbed && (IsJumping() || IsFalling()))
+        // When Player Grab the wall
+        if (isWallGrabbed)
         {
-            rb.gravityScale = 0f;
-            // When Player Grab the wall first
+            // for Straight Jump.
+            if (noControlTimeCnt <= 0f)
+            {
+                rb.gravityScale = 0f;
+            }
+
+            // Grab the wall at first
             if (grabbedDirection == 0)
             {
                 grabbedDirection = (short)xDirection;
                 rb.velocity = Vector2.zero;
             }
-
-            stamina -= Time.deltaTime;
         }
+
+        // Not Grabbing.
         else
         {
             grabbedDirection = 0;
             rb.gravityScale = playerDefaultGravity;
+        }
+    }
+
+    private void StaminaControl()
+    {
+        if (isWallGrabbed)
+        {
+            stamina -= staminaMinusMult * Time.deltaTime;
+        }
+    }
+
+    private void NoControlTimeControl()
+    {
+        if (noControlTimeCnt >= 0f)
+        {
+            noControlTimeCnt -= Time.deltaTime;
         }
     }
 
@@ -287,6 +307,27 @@ public class Player : MonoBehaviour
     {
         xDirection = context.ReadValue<Vector2>().x;
         yDirection = context.ReadValue<Vector2>().y;
+
+        if (noControlTimeCnt > 0f)
+        {
+            xDirection = 0;
+            yDirection = 0;
+        }
+    }
+
+    public void GetInputJump(InputAction.CallbackContext context)
+    {
+        // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
+
+        if (context.performed)
+        {
+            isPressedJump = true;
+        }
+
+        if (context.canceled || noControlTimeCnt > 0f)
+        {
+            isPressedJump = false;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collider)
