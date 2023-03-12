@@ -36,6 +36,8 @@ public class PlayerMovement : MonoBehaviour
     private readonly float noControlTime = 0.15f;
     private readonly float noControlTimeForStJump = 0.3f;
     public float noControlTimeCnt;
+    // takes 6 frames to Max
+    public readonly float runAccTime = 6f;
 
 
     // DANGER : This is NOT a READ ONLY.
@@ -89,7 +91,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
 
-                rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, maxFallVel, 0f));
+                rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, maxFallVel));
             }
         }
     }
@@ -149,7 +151,10 @@ public class PlayerMovement : MonoBehaviour
         // Running
         if (!isWallGrabbed)
         {
-            rb.velocity = new Vector2(xDirection * maxSpeed, rb.velocity.y);
+            float addX = rb.velocity.x + xDirection * 1 / runAccTime * maxSpeed;
+            rb.velocity = new Vector2(addX, rb.velocity.y);
+
+            rb.velocity = new Vector2(Mathf.Min(Mathf.Abs(rb.velocity.x), maxSpeed * Mathf.Abs(xDirection) * Mathf.Sign(rb.velocity.x)), rb.velocity.y);
         }
 
         // Wall Climbing
