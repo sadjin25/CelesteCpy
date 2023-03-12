@@ -41,6 +41,8 @@ public class Player : MonoBehaviour
             Destroy(gameObject);
         }
 
+        // TODO : put it in Game Manager.
+        Application.targetFrameRate = 60;
 
         anim = GetComponent<Animator>();
     }
