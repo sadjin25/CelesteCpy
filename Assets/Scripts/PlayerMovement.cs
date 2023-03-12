@@ -41,6 +41,8 @@ public class PlayerMovement : MonoBehaviour
     // DANGER : This is NOT a READ ONLY.
     private float playerDefaultGravity;
     private float gravityMult = 1.5f;
+    // DANGER : This value should be MINUS.
+    public readonly float maxFallVel = -20f;
     private float lowJumpMult = 1.5f;
     private float jumpForce = 14f;
 
@@ -86,6 +88,8 @@ public class PlayerMovement : MonoBehaviour
             if (rb.velocity.y < 0 && !isGrounded)
             {
                 rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
+
+                rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, maxFallVel, 0f));
             }
         }
     }
