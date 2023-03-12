@@ -16,6 +16,9 @@ public class PlayerMovement : MonoBehaviour
 
     private float xDirection;
     private float yDirection;
+    private bool isPressedGrab;
+    private bool isPressedJump;
+
     private bool isFacingRight = true;
 
     private bool isGrounded;
@@ -31,13 +34,15 @@ public class PlayerMovement : MonoBehaviour
 
     private readonly float maxSpeed = 10f;
     private readonly float noControlTime = 0.15f;
+    private readonly float noControlTimeForStJump = 0.3f;
     public float noControlTimeCnt;
+
+
     // DANGER : This is NOT a READ ONLY.
     private float playerDefaultGravity;
     private float gravityMult = 1.5f;
-    private float lowJumpMult = 1.2f;
+    private float lowJumpMult = 1.5f;
     private float jumpForce = 14f;
-    private bool isPressedJump;
 
     private void Start()
     {
@@ -96,7 +101,7 @@ public class PlayerMovement : MonoBehaviour
 
             if (isPressedJump && isGrounded)
             {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce); ;
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             }
 
             if (!isPressedJump && rb.velocity.y > 0)
@@ -109,31 +114,35 @@ public class PlayerMovement : MonoBehaviour
         {
             if (isPressedJump)
             {
-                // Can't control the player until it passes 'noControlTime'
-                noControlTimeCnt = noControlTime;
+                // Can't control the player until noControlTimeCnt passes 'noControlTime'
+                isWallGrabbed = false;
 
-                if (xDirection == grabbedDirection && stamina >= minStaminaToClimbJump)
+
+                if (noControlTimeCnt < 0.1f)
                 {
-                    stamina -= climbJumpStamina;
+                    // Climb Jump
+                    if (xDirection == grabbedDirection && stamina >= minStaminaToClimbJump)
+                    {
+                        noControlTimeCnt = noControlTimeForStJump;
+                        stamina -= climbJumpStamina;
 
-                    rb.velocity = new Vector2(0f, jumpForce);
+                        rb.velocity = new Vector2(0f, jumpForce);
+                    }
+
+                    //  Wall Jump
+                    else
+                    {
+                        noControlTimeCnt = noControlTime;
+                        rb.velocity = new Vector2(xDirection * maxSpeed, jumpForce);
+                    }
                 }
 
-                else
-                {
-                    isWallGrabbed = false;
-                    rb.velocity = new Vector2(xDirection * maxSpeed, jumpForce);
-                }
             }
         }
     }
 
     private void Movement()
     {
-        if (noControlTimeCnt > 0f)
-        {
-            noControlTimeCnt -= Time.deltaTime;
-        }
 
         // Running
         if (!isWallGrabbed)
@@ -141,11 +150,13 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(xDirection * maxSpeed, rb.velocity.y);
         }
 
-        // Grabbing Wall
+        // Wall Climbing
         if (isWallGrabbed)
         {
             rb.velocity = new Vector2(rb.velocity.x, yDirection * maxClimbSpeed);
-            if (yDirection > 0 || yDirection < 0)
+
+            // Climbing up the wall reduces stamina fast.
+            if (yDirection > 0)
             {
                 staminaMinusMult = 2f;
             }
@@ -165,38 +176,33 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded)
         {
             // can hold wall for (x)f seconds.
+            // TODO : make Refill() func.
             stamina = 7f;
         }
     }
 
     private void WallChk()
     {
-        // BUG : Player hold the wall while standing on the ground.
-        isWallGrabbed = Physics2D.OverlapCircle(wallChkr.position, 0.2f, groundLayer);
+        isWallGrabbed = isPressedGrab && Physics2D.OverlapCircle(wallChkr.position, 0.2f, groundLayer);
 
-        if (stamina <= 0 || isGrounded)
+        if (stamina <= 0 || isGrounded || noControlTimeCnt > 0.1f)
         {
             isWallGrabbed = false;
         }
 
-        // When Player Grab the wall
         if (isWallGrabbed)
         {
-            // for Straight Jump.
-            if (noControlTimeCnt <= 0f)
-            {
-                rb.gravityScale = 0f;
-            }
+            // Stick to wall.
+            rb.gravityScale = 0f;
 
-            // Grab the wall at first
+            // Grab the wall at first or didn't pressed arrow key.
             if (grabbedDirection == 0)
             {
                 grabbedDirection = (short)xDirection;
-                rb.velocity = Vector2.zero;
             }
         }
 
-        // Not Grabbing.
+        // Not Grabbing.(wall jumping / isGrounded, etc)
         else
         {
             grabbedDirection = 0;
@@ -214,7 +220,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void NoControlTimeControl()
     {
-        if (noControlTimeCnt >= 0f)
+        if (noControlTimeCnt > 0f)
         {
             noControlTimeCnt -= Time.deltaTime;
         }
@@ -247,10 +253,10 @@ public class PlayerMovement : MonoBehaviour
         xDirection = context.ReadValue<Vector2>().x;
         yDirection = context.ReadValue<Vector2>().y;
 
-        if (noControlTimeCnt > 0f)
+        if (noControlTimeCnt > 0.1f)
         {
-            xDirection = 0;
-            yDirection = 0;
+            xDirection = 0f;
+            yDirection = 0f;
         }
     }
 
@@ -263,9 +269,24 @@ public class PlayerMovement : MonoBehaviour
             isPressedJump = true;
         }
 
-        if (context.canceled || noControlTimeCnt > 0f)
+        if (context.canceled || noControlTimeCnt > 0.1f)
         {
             isPressedJump = false;
+        }
+    }
+
+    public void GetInputGrab(InputAction.CallbackContext context)
+    {
+        // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
+
+        if (context.performed)
+        {
+            isPressedGrab = true;
+        }
+
+        if (context.canceled)
+        {
+            isPressedGrab = false;
         }
     }
 }
