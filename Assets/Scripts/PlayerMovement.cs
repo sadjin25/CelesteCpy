@@ -38,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
     public float noControlTimeCnt;
     // takes 6 frames to Max
     public readonly float runAccTime = 6f;
+    // takes 3 frames to 0
+    public readonly float runDecTime = 3f;
 
 
     // DANGER : This is NOT a READ ONLY.
@@ -155,6 +157,15 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(addX, rb.velocity.y);
 
             rb.velocity = new Vector2(Mathf.Min(Mathf.Abs(rb.velocity.x), maxSpeed * Mathf.Abs(xDirection) * Mathf.Sign(rb.velocity.x)), rb.velocity.y);
+
+            // Release the key while run
+            if (xDirection == 0f && System.Math.Sign(xDirection) != System.Math.Sign(rb.velocity.x))
+            {
+                addX = rb.velocity.x + xDirection * 1 / runDecTime * maxSpeed;
+                rb.velocity = new Vector2(addX, rb.velocity.y);
+
+                rb.velocity = new Vector2(Mathf.Max(Mathf.Abs(rb.velocity.x), 0f), rb.velocity.y);
+            }
         }
 
         // Wall Climbing
