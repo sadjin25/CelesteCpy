@@ -17,7 +17,7 @@ public class PlayerMovement : MonoBehaviour
     private float xDirection;
     private float yDirection;
     private bool isPressedGrab;
-    private bool isPressedJump;
+    public bool isPressedJump;
 
     private bool isFacingRight = true;
 
@@ -66,9 +66,11 @@ public class PlayerMovement : MonoBehaviour
         {
             GroundChk();
             WallChk();
-            JumpAndFallChk();
+            JumpChk();
+            FallChk();
             StaminaControl();
             NoControlTimeControl();
+            Movement();
 
             if (!isWallGrabbed)
             {
@@ -77,16 +79,18 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-
-    void FixedUpdate()
+    private void FallChk()
     {
-        if (!Player.player.isDead)
+        if (!isWallGrabbed)
         {
-            Movement();
+            if (rb.velocity.y < 0 && !isGrounded)
+            {
+                rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
+            }
         }
     }
 
-    private void JumpAndFallChk()
+    private void JumpChk()
     {
         // Jumping
         // TODO     : add half grav threshold at the top of jump.
@@ -94,11 +98,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isWallGrabbed)
         {
-            if (rb.velocity.y < 0 && !isGrounded)
-            {
-                rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
-            }
-
             if (isPressedJump && isGrounded)
             {
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce);
@@ -125,7 +124,6 @@ public class PlayerMovement : MonoBehaviour
                     {
                         noControlTimeCnt = noControlTimeForStJump;
                         stamina -= climbJumpStamina;
-
                         rb.velocity = new Vector2(0f, jumpForce);
                     }
 
@@ -136,13 +134,13 @@ public class PlayerMovement : MonoBehaviour
                         rb.velocity = new Vector2(xDirection * maxSpeed, jumpForce);
                     }
                 }
-
             }
         }
     }
 
     private void Movement()
     {
+        // BUG : If horizontal key and vertical key are pressed both, velocity goes 10, 8 -> 7, 5 (?? : y value)   
 
         // Running
         if (!isWallGrabbed)
@@ -151,7 +149,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Wall Climbing
-        if (isWallGrabbed)
+        else if (isWallGrabbed)
         {
             rb.velocity = new Vector2(rb.velocity.x, yDirection * maxClimbSpeed);
 
@@ -177,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
         {
             // can hold wall for (x)f seconds.
             // TODO : make Refill() func.
-            stamina = 7f;
+            stamina = maxStamina;
         }
     }
 
@@ -194,6 +192,7 @@ public class PlayerMovement : MonoBehaviour
         {
             // Stick to wall.
             rb.gravityScale = 0f;
+            rb.velocity = Vector2.zero;
 
             // Grab the wall at first or didn't pressed arrow key.
             if (grabbedDirection == 0)

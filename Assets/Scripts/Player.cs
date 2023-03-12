@@ -77,7 +77,7 @@ public class Player : MonoBehaviour
     private void AnimTransition()
     {
         // Running
-        if (PlayerMovement.playerMovement.rb.velocity.x > 0.1f || PlayerMovement.playerMovement.rb.velocity.x < 0.1f)
+        if (Mathf.Abs(PlayerMovement.playerMovement.rb.velocity.x) > 0.1f)
         {
             State = SpriteState.running;
         }
