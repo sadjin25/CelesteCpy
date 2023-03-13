@@ -151,8 +151,8 @@ public class PlayerMovement : MonoBehaviour
 
             rb.velocity = new Vector2(Mathf.Min(Mathf.Abs(rb.velocity.x), maxSpeed * Mathf.Abs(xDirection) * Mathf.Sign(rb.velocity.x)), rb.velocity.y);
 
-            // Release the key while run
-            if (xDirection == 0f && System.Math.Sign(xDirection) != System.Math.Sign(rb.velocity.x))
+            // Deceleration when Release the key or direction change.
+            if (xDirection == 0f || System.Math.Sign(xDirection) != System.Math.Sign(rb.velocity.x))
             {
                 addX = rb.velocity.x + xDirection * 1 / runDecTime * maxSpeed;
                 rb.velocity = new Vector2(addX, rb.velocity.y);
