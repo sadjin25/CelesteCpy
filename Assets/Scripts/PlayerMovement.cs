@@ -8,15 +8,17 @@ public class PlayerMovement : MonoBehaviour
 {
     public static PlayerMovement playerMovement;
     public Rigidbody2D rb;
+    private Collider2D playerCollider;
 
     [SerializeField] private Transform groundChkr;
     [SerializeField] private LayerMask groundLayer;
 
     [SerializeField] private Transform wallChkr;
+    private Vector2 wallChkrVec = new Vector2(0.2f, 1.5f);
 
     private float xDirection;
     private float yDirection;
-    private bool isPressedGrab;
+    public bool isPressedGrab;
     public bool isPressedJump;
 
     private bool isFacingRight = true;
@@ -24,22 +26,20 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
 
     private bool isWallGrabbed;
-    private short grabbedDirection;
     public float stamina;
     public float staminaMinusMult = 1f;
+    public bool noGrab;
     private readonly float maxStamina = 7f;
     private readonly float maxClimbSpeed = 3f;
     private readonly float climbJumpStamina = 1.5f;
     private readonly float minStaminaToClimbJump = 2f;
+    private readonly float noGrabTime = 0.4f;
 
     private readonly float maxSpeed = 10f;
-    private readonly float noControlTime = 0.15f;
-    private readonly float noControlTimeForStJump = 0.3f;
-    public float noControlTimeCnt;
     // takes 6 frames to Max
-    public readonly float runAccTime = 6f;
+    private readonly float runAccTime = 6f;
     // takes 3 frames to 0
-    public readonly float runDecTime = 3f;
+    private readonly float runDecTime = 3f;
 
 
     // DANGER : This is NOT a READ ONLY.
@@ -53,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerCollider = GetComponent<Collider2D>();
         playerDefaultGravity = rb.gravityScale;
 
         // Singleton Init
@@ -75,7 +76,6 @@ public class PlayerMovement : MonoBehaviour
             JumpChk();
             FallChk();
             StaminaControl();
-            NoControlTimeControl();
             Movement();
 
             if (!isWallGrabbed)
@@ -97,6 +97,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+
 
     private void JumpChk()
     {
@@ -121,29 +122,21 @@ public class PlayerMovement : MonoBehaviour
         {
             if (isPressedJump)
             {
-                // Can't control the player until noControlTimeCnt passes 'noControlTime'
                 isWallGrabbed = false;
-
-
-                if (noControlTimeCnt < 0.1f)
-                {
-                    // Climb Jump
-                    if (xDirection == grabbedDirection && stamina >= minStaminaToClimbJump)
+                /*
+                    // Straight Jump
+                    if (xDirection == 0f && stamina >= minStaminaToClimbJump)
                     {
-                        noControlTimeCnt = noControlTimeForStJump;
+                        StartCoroutine(StopGrab(noGrabTime));
                         stamina -= climbJumpStamina;
                         rb.velocity = new Vector2(0f, jumpForce);
                     }
-
-                    //  Wall Jump
-                    else
-                    {
-                        noControlTimeCnt = noControlTime;
-                        rb.velocity = new Vector2(xDirection * maxSpeed, jumpForce);
-                    }
-                }
+      */
+                //  Wall Jump
+                rb.velocity = new Vector2(xDirection * maxSpeed, jumpForce);
             }
         }
+
     }
 
     private void Movement()
@@ -171,7 +164,7 @@ public class PlayerMovement : MonoBehaviour
         // Wall Climbing
         else if (isWallGrabbed)
         {
-            rb.velocity = new Vector2(rb.velocity.x, yDirection * maxClimbSpeed);
+            rb.velocity = new Vector2(0f, yDirection * maxClimbSpeed);
 
             // Climbing up the wall reduces stamina fast.
             if (yDirection > 0)
@@ -201,9 +194,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallChk()
     {
-        isWallGrabbed = isPressedGrab && Physics2D.OverlapCircle(wallChkr.position, 0.2f, groundLayer);
+        isWallGrabbed = isPressedGrab && Physics2D.OverlapBox(wallChkr.position, wallChkrVec, 0f, groundLayer);
 
-        if (stamina <= 0 || isGrounded || noControlTimeCnt > 0.1f)
+
+        if (stamina <= 0f || isGrounded)
         {
             isWallGrabbed = false;
         }
@@ -211,20 +205,13 @@ public class PlayerMovement : MonoBehaviour
         if (isWallGrabbed)
         {
             // Stick to wall.
-            rb.gravityScale = 0f;
             rb.velocity = Vector2.zero;
-
-            // Grab the wall at first or didn't pressed arrow key.
-            if (grabbedDirection == 0)
-            {
-                grabbedDirection = (short)xDirection;
-            }
+            rb.gravityScale = 0f;
         }
 
         // Not Grabbing.(wall jumping / isGrounded, etc)
         else
         {
-            grabbedDirection = 0;
             rb.gravityScale = playerDefaultGravity;
         }
     }
@@ -234,14 +221,6 @@ public class PlayerMovement : MonoBehaviour
         if (isWallGrabbed)
         {
             stamina -= staminaMinusMult * Time.deltaTime;
-        }
-    }
-
-    private void NoControlTimeControl()
-    {
-        if (noControlTimeCnt > 0f)
-        {
-            noControlTimeCnt -= Time.deltaTime;
         }
     }
 
@@ -271,12 +250,6 @@ public class PlayerMovement : MonoBehaviour
     {
         xDirection = context.ReadValue<Vector2>().x;
         yDirection = context.ReadValue<Vector2>().y;
-
-        if (noControlTimeCnt > 0.1f)
-        {
-            xDirection = 0f;
-            yDirection = 0f;
-        }
     }
 
     public void GetInputJump(InputAction.CallbackContext context)
@@ -288,7 +261,7 @@ public class PlayerMovement : MonoBehaviour
             isPressedJump = true;
         }
 
-        if (context.canceled || noControlTimeCnt > 0.1f)
+        if (context.canceled)
         {
             isPressedJump = false;
         }
@@ -296,16 +269,22 @@ public class PlayerMovement : MonoBehaviour
 
     public void GetInputGrab(InputAction.CallbackContext context)
     {
-        // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
-
         if (context.performed)
         {
             isPressedGrab = true;
         }
 
-        if (context.canceled)
+        if (context.canceled || noGrab)
         {
             isPressedGrab = false;
         }
     }
+
+    private IEnumerator StopGrab(float stopTime)
+    {
+        noGrab = true;
+        yield return new WaitForSeconds(stopTime);
+        noGrab = false;
+    }
+
 }
