@@ -20,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private float yDirection;
     public bool isPressedGrab;
     public bool isPressedJump;
+    public bool isPressedDash;
 
     private bool isFacingRight = true;
 
@@ -41,6 +42,10 @@ public class PlayerMovement : MonoBehaviour
     // takes 3 frames to 0
     private readonly float runDecTime = 3f;
 
+
+    private bool isDashing;
+    private bool isDashAvailable;
+    private readonly float dashForce = 20f;
 
     // DANGER : This is NOT a READ ONLY.
     private float playerDefaultGravity;
@@ -87,6 +92,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void FallChk()
     {
+        if (isDashing)
+        {
+            return;
+        }
+
         if (!isWallGrabbed)
         {
             if (rb.velocity.y < 0 && !isGrounded)
@@ -104,6 +114,11 @@ public class PlayerMovement : MonoBehaviour
         // Jumping
         // TODO     : add half grav threshold at the top of jump.
         // TODO     : seperate jump / fall(or grav) control
+
+        if (isDashing)
+        {
+            return;
+        }
 
         if (!isWallGrabbed)
         {
@@ -143,8 +158,14 @@ public class PlayerMovement : MonoBehaviour
     {
         // BUG : If horizontal key and vertical key are pressed both, velocity goes 10, 8 -> 7, 5 (?? : y value)   
 
+        // Dashing
+        if (isPressedDash && isDashAvailable)
+        {
+            StartCoroutine(Dash());
+        }
+
         // Running
-        if (!isWallGrabbed)
+        else if (!isWallGrabbed && !isDashing)
         {
             float addX = rb.velocity.x + xDirection * 1 / runAccTime * maxSpeed;
             rb.velocity = new Vector2(addX, rb.velocity.y);
@@ -189,6 +210,7 @@ public class PlayerMovement : MonoBehaviour
             // can hold wall for (x)f seconds.
             // TODO : make Refill() func.
             stamina = maxStamina;
+            isDashAvailable = true;
         }
     }
 
@@ -255,6 +277,11 @@ public class PlayerMovement : MonoBehaviour
     public void GetInputJump(InputAction.CallbackContext context)
     {
         // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
+        if (isDashing)
+        {
+            isPressedJump = false;
+            return;
+        }
 
         if (context.performed)
         {
@@ -280,11 +307,55 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void GetInputDash(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            isPressedDash = true;
+        }
+
+        if (context.canceled)
+        {
+            isPressedDash = false;
+        }
+    }
+
     private IEnumerator StopGrab(float stopTime)
     {
         noGrab = true;
         yield return new WaitForSeconds(stopTime);
         noGrab = false;
+    }
+
+    private IEnumerator Dash()
+    {
+        isDashAvailable = false;
+        isDashing = true;
+
+        rb.gravityScale = 0f;
+        rb.velocity = Vector2.zero;
+
+        // Wait for Input
+        int frame = 3;
+        while (frame-- > 0)
+        {
+            yield return null;
+        }
+
+        float X = xDirection;
+        float Y = yDirection;
+        Vector2 dashVec = new Vector2(X * dashForce, Y * dashForce);
+        rb.velocity = dashVec;
+
+        // Dashing for 12 frames.
+        frame = 12;
+        while (frame-- > 0)
+        {
+            yield return null;
+        }
+
+        rb.gravityScale = playerDefaultGravity;
+        isDashing = false;
     }
 
 }

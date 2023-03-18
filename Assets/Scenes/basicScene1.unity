@@ -9962,8 +9962,16 @@ PrefabInstance:
       value: Player/Grab[/Keyboard/c]
       objectReference: {fileID: 0}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[13].m_PersistentCalls.m_Calls.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[13].m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -9971,6 +9979,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6434288756729047177}
+    - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 6434288756729047177}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
@@ -9982,8 +9994,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6434288756729047177}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[13].m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: GetInputDash
       objectReference: {fileID: 0}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[13].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
@@ -9994,12 +10014,20 @@ PrefabInstance:
       value: PlayerMovement, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PlayerMovement, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[2].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: PlayerMovement, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[13].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: PlayerMovement, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
+      propertyPath: m_ActionEvents.Array.data[1].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 3587901951879328601, guid: 0ae14c9ecf33b694e8c5f79f3d1b9449, type: 3}
       propertyPath: m_ActionEvents.Array.data[13].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
