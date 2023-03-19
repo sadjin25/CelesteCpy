@@ -27,6 +27,8 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
 
     private bool isWallGrabbed;
+    private bool isWallClose;
+    private bool isWallJumping;
     public float stamina;
     public float staminaMinusMult = 1f;
     public bool noGrab;
@@ -34,7 +36,6 @@ public class PlayerMovement : MonoBehaviour
     private readonly float maxClimbSpeed = 3f;
     private readonly float climbJumpStamina = 1.5f;
     private readonly float minStaminaToClimbJump = 2f;
-    private readonly float noGrabTime = 0.4f;
 
     private readonly float maxSpeed = 10f;
     // takes 6 frames to Max
@@ -133,25 +134,31 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        else if (isWallGrabbed)
+        if (isWallClose && !isGrounded)
         {
             if (isPressedJump)
             {
-                isWallGrabbed = false;
-                /*
-                    // Straight Jump
-                    if (xDirection == 0f && stamina >= minStaminaToClimbJump)
-                    {
-                        StartCoroutine(StopGrab(noGrabTime));
-                        stamina -= climbJumpStamina;
-                        rb.velocity = new Vector2(0f, jumpForce);
-                    }
-      */
-                //  Wall Jump
-                rb.velocity = new Vector2(xDirection * maxSpeed, jumpForce);
+                StartCoroutine(WallJump());
             }
         }
+        /*
+            else if (isWallGrabbed)
+            {
+                if (isPressedJump)
+                {
+                    isWallGrabbed = false;
 
+                        // Straight Jump
+                        if (xDirection == 0f && stamina >= minStaminaToClimbJump)
+                        {
+                            StartCoroutine(StopGrab(noGrabTime));
+                            stamina -= climbJumpStamina;
+                            rb.velocity = new Vector2(0f, jumpForce);
+                        }
+
+                }
+            }
+        */
     }
 
     private void Movement()
@@ -165,7 +172,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Running
-        else if (!isWallGrabbed && !isDashing)
+        else if (!isWallGrabbed && !isDashing && !isWallJumping)
         {
             float addX = rb.velocity.x + xDirection * 1 / runAccTime * maxSpeed;
             rb.velocity = new Vector2(addX, rb.velocity.y);
@@ -217,6 +224,7 @@ public class PlayerMovement : MonoBehaviour
     private void WallChk()
     {
         isWallGrabbed = isPressedGrab && Physics2D.OverlapBox(wallChkr.position, wallChkrVec, 0f, groundLayer);
+        isWallClose = Physics2D.OverlapBox(wallChkr.position, wallChkrVec, 0f, groundLayer);
 
 
         if (stamina <= 0f || isGrounded)
@@ -325,6 +333,42 @@ public class PlayerMovement : MonoBehaviour
         noGrab = true;
         yield return new WaitForSeconds(stopTime);
         noGrab = false;
+    }
+
+    private IEnumerator WallJump()
+    {
+        rb.velocity = Vector2.zero;
+        isWallJumping = true;
+
+        Vector2 jumpVec = new Vector2(maxSpeed, jumpForce);
+
+        if (isFacingRight)
+        {
+            jumpVec.x *= -1;
+
+            isFacingRight = !isFacingRight;
+
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1f;
+            transform.localScale = localScale;
+        }
+        else
+        {
+            isFacingRight = !isFacingRight;
+
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1f;
+            transform.localScale = localScale;
+        }
+        rb.velocity = jumpVec;
+
+        int frame = 10;
+        while (frame-- > 0)
+        {
+            yield return null;
+        }
+
+        isWallJumping = false;
     }
 
     private IEnumerator Dash()
