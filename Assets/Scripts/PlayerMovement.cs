@@ -114,12 +114,11 @@ public class PlayerMovement : MonoBehaviour
     {
         // Jumping
         // TODO     : add half grav threshold at the top of jump.
-        // TODO     : seperate jump / fall(or grav) control
-
         if (isDashing)
         {
             return;
         }
+
 
         if (!isWallGrabbed)
         {
@@ -128,19 +127,17 @@ public class PlayerMovement : MonoBehaviour
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             }
 
-            if (!isPressedJump && rb.velocity.y > 0)
+            else if (!isPressedJump && rb.velocity.y > 0)
             {
                 rb.velocity += Vector2.up * Physics2D.gravity.y * lowJumpMult * Time.deltaTime;
             }
-        }
 
-        if (isWallClose && !isGrounded)
-        {
-            if (isPressedJump)
+            else if (Mathf.Abs(xDirection) > 0f && isPressedJump && isWallClose && !isGrounded)
             {
                 StartCoroutine(WallJump());
             }
         }
+
         /*
             else if (isWallGrabbed)
             {
@@ -163,7 +160,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        // BUG : If horizontal key and vertical key are pressed both, velocity goes 10, 8 -> 7, 5 (?? : y value)   
+        // BUG? : xDir, yDir calculates diagonal value. 
 
         // Dashing
         if (isPressedDash && isDashAvailable)
