@@ -41,9 +41,6 @@ public class Player : MonoBehaviour
             Destroy(gameObject);
         }
 
-        // TODO : put it in Game Manager.
-        Application.targetFrameRate = 60;
-
         anim = GetComponent<Animator>();
     }
 
@@ -66,14 +63,8 @@ public class Player : MonoBehaviour
             PlayerMovement.playerMovement.rb.velocity = Vector2.zero;
             isGameOver = true;
             // TODO : make game manager, and load scene func goes in here.
-            StartCoroutine(LoadNewScene());
+            GameManager.Instance.LoadMap();
         }
-    }
-
-    private IEnumerator LoadNewScene()
-    {
-        yield return new WaitForSeconds(1);
-        SceneManager.LoadScene("basicScene1");
     }
 
     private void AnimTransition()
