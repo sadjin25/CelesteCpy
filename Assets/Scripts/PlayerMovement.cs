@@ -16,6 +16,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform wallChkr;
     private Vector2 wallChkrVec = new Vector2(0.2f, 1.5f);
 
+    public bool isPlayerTimeStopped;
+
     private float xDirection;
     private float yDirection;
     public bool isPressedGrab;
@@ -75,7 +77,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!Player.player.isDead)
+        if (!Player.player.isDead && !isPlayerTimeStopped)
         {
             GroundChk();
             WallChk();

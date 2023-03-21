@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -44,12 +43,11 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         DeadChk();
         AnimTransition();
     }
-
 
     public void GetMelon()
     {
@@ -62,7 +60,7 @@ public class Player : MonoBehaviour
         {
             PlayerMovement.playerMovement.rb.velocity = Vector2.zero;
             isGameOver = true;
-            // TODO : make game manager, and load scene func goes in here.
+
             GameManager.Instance.LoadMap();
         }
     }

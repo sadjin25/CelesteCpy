@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    private PauseMenu pauseMenu;
     private bool isEscapePressed;
     private bool escapeKeyToggled;
 
@@ -25,6 +26,9 @@ public class GameManager : MonoBehaviour
 
         Application.targetFrameRate = 60;
         DontDestroyOnLoad(gameObject);
+
+        // ! Activate it only when game starts.
+        pauseMenu = FindObjectOfType<PauseMenu>();
     }
 
     void Update()
@@ -32,14 +36,14 @@ public class GameManager : MonoBehaviour
         if (isEscapePressed && !escapeKeyToggled)
         {
             escapeKeyToggled = true;
-            bool isAlreadyPaused = PauseMenu.Instance.IsPaused;
+            bool isAlreadyPaused = pauseMenu.IsPaused;
             if (isAlreadyPaused)
             {
-                PauseMenu.Instance.ResumeGame();
+                pauseMenu.ResumeGame();
             }
             else
             {
-                PauseMenu.Instance.PauseGame();
+                pauseMenu.PauseGame();
             }
         }
     }
@@ -56,6 +60,18 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("basicScene1");
     }
 
+
+    public void StopGameTimeFlow()
+    {
+        Time.timeScale = 0f;
+        PlayerMovement.playerMovement.isPlayerTimeStopped = true;
+    }
+
+    public void ResumeGameTimeFlow()
+    {
+        Time.timeScale = 1f;
+        PlayerMovement.playerMovement.isPlayerTimeStopped = false;
+    }
 
     public void GetInputEscape(InputAction.CallbackContext context)
     {
