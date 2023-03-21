@@ -29,12 +29,12 @@ public class PlayerMovement : MonoBehaviour
     private bool isWallGrabbed;
     private bool isWallClose;
     private bool isWallJumping;
+    private bool isClimbJumping;
     public float stamina;
     public float staminaMinusMult = 1f;
-    public bool noGrab;
     private readonly float maxStamina = 7f;
     private readonly float maxClimbSpeed = 3f;
-    private readonly float climbJumpStamina = 1.5f;
+    private readonly float climbJumpStamina = 7 / 4f;
     private readonly float minStaminaToClimbJump = 2f;
 
     private readonly float maxSpeed = 10f;
@@ -120,7 +120,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
 
-        if (!isWallGrabbed)
+        if (!isWallGrabbed && !isWallJumping)
         {
             if (isPressedJump && isGrounded)
             {
@@ -138,24 +138,10 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        /*
-            else if (isWallGrabbed)
-            {
-                if (isPressedJump)
-                {
-                    isWallGrabbed = false;
-
-                        // Straight Jump
-                        if (xDirection == 0f && stamina >= minStaminaToClimbJump)
-                        {
-                            StartCoroutine(StopGrab(noGrabTime));
-                            stamina -= climbJumpStamina;
-                            rb.velocity = new Vector2(0f, jumpForce);
-                        }
-
-                }
-            }
-        */
+        else if (isWallGrabbed && isPressedJump && stamina > minStaminaToClimbJump)
+        {
+            StartCoroutine(ClimbJump());
+        }
     }
 
     private void Movement()
@@ -169,7 +155,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Running
-        else if (!isWallGrabbed && !isDashing && !isWallJumping)
+        else if (!isWallGrabbed && !isDashing && !isWallJumping && !isClimbJumping)
         {
             float addX = rb.velocity.x + xDirection * 1 / runAccTime * maxSpeed;
             rb.velocity = new Vector2(addX, rb.velocity.y);
@@ -220,9 +206,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallChk()
     {
-        isWallGrabbed = isPressedGrab && Physics2D.OverlapBox(wallChkr.position, wallChkrVec, 0f, groundLayer);
         isWallClose = Physics2D.OverlapBox(wallChkr.position, wallChkrVec, 0f, groundLayer);
+        isWallGrabbed = isPressedGrab && isWallClose;
 
+        if (isWallJumping)
+        {
+            isWallGrabbed = false;
+            return;
+        }
 
         if (stamina <= 0f || isGrounded)
         {
@@ -282,12 +273,6 @@ public class PlayerMovement : MonoBehaviour
     public void GetInputJump(InputAction.CallbackContext context)
     {
         // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
-        if (isDashing)
-        {
-            isPressedJump = false;
-            return;
-        }
-
         if (context.performed)
         {
             isPressedJump = true;
@@ -306,7 +291,7 @@ public class PlayerMovement : MonoBehaviour
             isPressedGrab = true;
         }
 
-        if (context.canceled || noGrab)
+        if (context.canceled)
         {
             isPressedGrab = false;
         }
@@ -323,13 +308,6 @@ public class PlayerMovement : MonoBehaviour
         {
             isPressedDash = false;
         }
-    }
-
-    private IEnumerator StopGrab(float stopTime)
-    {
-        noGrab = true;
-        yield return new WaitForSeconds(stopTime);
-        noGrab = false;
     }
 
     private IEnumerator WallJump()
@@ -385,8 +363,7 @@ public class PlayerMovement : MonoBehaviour
 
         float X = xDirection;
         float Y = yDirection;
-        Vector2 dashVec = new Vector2(X * dashForce, Y * dashForce);
-        rb.velocity = dashVec;
+        rb.velocity = new Vector2(X * dashForce, Y * dashForce);
 
         // Dashing for 12 frames.
         frame = 12;
@@ -399,4 +376,20 @@ public class PlayerMovement : MonoBehaviour
         isDashing = false;
     }
 
+    private IEnumerator ClimbJump()
+    {
+        stamina -= climbJumpStamina;
+        isClimbJumping = true;
+        rb.velocity = Vector2.zero;
+        rb.gravityScale = playerDefaultGravity;
+
+        rb.velocity = new Vector2(0f, jumpForce);
+
+        while (!IsFalling())
+        {
+            yield return null;
+        }
+
+        isClimbJumping = false;
+    }
 }
