@@ -24,10 +24,14 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
 
-        Application.targetFrameRate = 60;
         DontDestroyOnLoad(gameObject);
 
-        // ! Activate it only when game starts.
+        // BASIC GAME SETTINGS 
+        Application.targetFrameRate = 60;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // ! Activate it only when game(not entire program) starts.
         pauseMenu = FindObjectOfType<PauseMenu>();
     }
 
