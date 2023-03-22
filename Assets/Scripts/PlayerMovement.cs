@@ -365,7 +365,12 @@ public class PlayerMovement : MonoBehaviour
 
         float X = xDirection;
         float Y = yDirection;
-        rb.velocity = new Vector2(X * dashForce, Y * dashForce);
+        float diagDashMult = 1f;
+        if (Mathf.Abs(X) > 0f && Mathf.Abs(Y) > 0f)
+        {
+            diagDashMult = 0.707f;
+        }
+        rb.velocity = new Vector2(X * dashForce * diagDashMult, Y * dashForce * diagDashMult);
 
         // Dashing for 12 frames.
         frame = 12;
