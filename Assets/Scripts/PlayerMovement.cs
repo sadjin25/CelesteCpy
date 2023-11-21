@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] InputReader _inputReader;
+
     public static PlayerMovement playerMovement;
     public Rigidbody2D rb;
     private Collider2D playerCollider;
@@ -18,11 +20,12 @@ public class PlayerMovement : MonoBehaviour
 
     public bool isPlayerTimeStopped;
 
-    private float xDirection;
-    private float yDirection;
-    public bool isPressedGrab;
-    public bool isPressedJump;
-    public bool isPressedDash;
+    //------------------INPUTS--------------------------
+    private Vector2 _moveDir;
+    public bool _grabInput;
+    public bool _jumpInput;
+    public bool _dashInput;
+    //-------------------STATES-------------------------
 
     private bool isFacingRight = true;
 
@@ -57,6 +60,11 @@ public class PlayerMovement : MonoBehaviour
     public readonly float maxFallVel = -20f;
     private float lowJumpMult = 1.5f;
     private float jumpForce = 14f;
+
+    void OnEnable()
+    {
+        _inputReader.MoveEvent += OnMove;
+    }
 
     private void Start()
     {
@@ -124,23 +132,23 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isWallGrabbed && !isWallJumping)
         {
-            if (isPressedJump && isGrounded)
+            if (_jumpInput && isGrounded)
             {
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             }
 
-            else if (!isPressedJump && rb.velocity.y > 0)
+            else if (!_jumpInput && rb.velocity.y > 0)
             {
                 rb.velocity += Vector2.up * Physics2D.gravity.y * lowJumpMult * Time.deltaTime;
             }
 
-            else if (Mathf.Abs(xDirection) > 0f && isPressedJump && isWallClose && !isGrounded)
+            else if (Mathf.Abs(xDirection) > 0f && _jumpInput && isWallClose && !isGrounded)
             {
                 StartCoroutine(WallJump());
             }
         }
 
-        else if (isWallGrabbed && isPressedJump && stamina > minStaminaToClimbJump)
+        else if (isWallGrabbed && _jumpInput && stamina > minStaminaToClimbJump)
         {
             StartCoroutine(ClimbJump());
         }
@@ -151,7 +159,7 @@ public class PlayerMovement : MonoBehaviour
         // BUG? : xDir, yDir calculates diagonal value. 
 
         // Dashing
-        if (isPressedDash && isDashAvailable)
+        if (_dashInput && isDashAvailable)
         {
             StartCoroutine(Dash());
         }
@@ -209,7 +217,7 @@ public class PlayerMovement : MonoBehaviour
     private void WallChk()
     {
         isWallClose = Physics2D.OverlapBox(wallChkr.position, wallChkrVec, 0f, groundLayer);
-        isWallGrabbed = isPressedGrab && isWallClose;
+        isWallGrabbed = _grabInput && isWallClose;
 
         if (isWallJumping)
         {
@@ -263,52 +271,6 @@ public class PlayerMovement : MonoBehaviour
             Vector3 localScale = transform.localScale;
             localScale.x *= -1f;
             transform.localScale = localScale;
-        }
-    }
-
-    public void GetInputDirection(InputAction.CallbackContext context)
-    {
-        xDirection = context.ReadValue<Vector2>().x;
-        yDirection = context.ReadValue<Vector2>().y;
-    }
-
-    public void GetInputJump(InputAction.CallbackContext context)
-    {
-        // MAYBE BUG? : It doesn't immediately change the value like FixedUpdate()... OR NOT
-        if (context.performed)
-        {
-            isPressedJump = true;
-        }
-
-        if (context.canceled)
-        {
-            isPressedJump = false;
-        }
-    }
-
-    public void GetInputGrab(InputAction.CallbackContext context)
-    {
-        if (context.performed)
-        {
-            isPressedGrab = true;
-        }
-
-        if (context.canceled)
-        {
-            isPressedGrab = false;
-        }
-    }
-
-    public void GetInputDash(InputAction.CallbackContext context)
-    {
-        if (context.performed)
-        {
-            isPressedDash = true;
-        }
-
-        if (context.canceled)
-        {
-            isPressedDash = false;
         }
     }
 
@@ -399,4 +361,17 @@ public class PlayerMovement : MonoBehaviour
 
         isClimbJumping = false;
     }
+
+    #region INPUT EVENTS
+    void OnMove(Vector2 input)
+    {
+        _moveDir = input;
+    }
+
+    void OnJump(bool isPressed) => _jumpInput = isPressed;
+
+    void OnDash() => _dashInput = true;
+
+    void OnGrab(bool isPressed) => _grabInput = isPressed;
+    #endregion
 }
