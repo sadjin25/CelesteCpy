@@ -43,7 +43,6 @@ GameObject:
   - component: {fileID: 781204502290674231}
   - component: {fileID: 781204502290674230}
   - component: {fileID: 781204502290674229}
-  - component: {fileID: 781204502290674228}
   - component: {fileID: 781204502290674227}
   - component: {fileID: 781204502290674225}
   - component: {fileID: 781204502290674226}
@@ -170,140 +169,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.3, y: 1.5}
   m_EdgeRadius: 0
---- !u!114 &781204502290674228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6024772674015833664}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 5a4f7a4161fb600429dd2864a1822574, type: 3}
-  m_NotificationBehavior: 2
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents:
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 781204502290674225}
-        m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
-        m_MethodName: GetInputDirection
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 6cfee2ff-4ab3-4f47-9df7-84ab78f05d9c
-    m_ActionName: Player/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 781204502290674225}
-        m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
-        m_MethodName: GetInputDash
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: eb24a5a9-815b-48d4-970f-b2a342d4f589
-    m_ActionName: Player/Fire[/Mouse/leftButton,/Keyboard/x]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 781204502290674225}
-        m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
-        m_MethodName: GetInputJump
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: f8633b15-7b6d-4e95-a870-c842f34cf250
-    m_ActionName: Player/Jump[/Keyboard/z]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: a8846617-d1de-4c14-adba-96076fdf8c0b
-    m_ActionName: UI/Navigate[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 89ede0bd-6854-4a20-8c5f-c21d61602220
-    m_ActionName: UI/Submit[/Keyboard/enter]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 1c190c6a-881d-4239-bc35-9f85a768028f
-    m_ActionName: UI/Cancel[/Keyboard/escape]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: ccf42442-c711-4ef9-9565-16836c0b1e6e
-    m_ActionName: UI/Point[/Mouse/position]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: a3d46e6b-476e-45c6-a525-6335fbb15b12
-    m_ActionName: UI/Click[/Mouse/leftButton]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 3f86d0e7-8bcd-4833-8e09-450a5fbbe006
-    m_ActionName: UI/ScrollWheel[/Mouse/scroll]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 72c351a0-941e-4e65-a4e6-5d191c70c1e9
-    m_ActionName: UI/MiddleClick[/Mouse/middleButton]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 474048bd-df71-4cc3-9244-edf2b28be926
-    m_ActionName: UI/RightClick[/Mouse/rightButton]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 8a30a045-08b4-41b9-b716-ba1acbd33ba5
-    m_ActionName: UI/TrackedDevicePosition
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 1b716a84-8320-4e42-b8a3-df3c5edaeb1b
-    m_ActionName: UI/TrackedDeviceOrientation
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 781204502290674225}
-        m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
-        m_MethodName: GetInputGrab
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: d2f0249b-0a7c-4117-80c6-09666fa4f4bd
-    m_ActionName: Player/Grab[/Keyboard/c]
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
 --- !u!114 &781204502290674227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,18 +194,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6304420e03dd54d800f320181929d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _inputReader: {fileID: 11400000, guid: b56fed706163e1c4eba60106aa14421c, type: 2}
   rb: {fileID: 781204502290674230}
   groundChkr: {fileID: 6024772673881449029}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   wallChkr: {fileID: 6024772674399784104}
-  isPressedGrab: 0
-  isPressedJump: 0
-  isPressedDash: 0
+  isPlayerTimeStopped: 0
+  _grabInput: 0
+  _jumpInput: 0
+  _dashInput: 0
   stamina: 0
   staminaMinusMult: 1
-  noGrab: 0
 --- !u!95 &781204502290674226
 Animator:
   serializedVersion: 5

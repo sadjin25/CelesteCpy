@@ -64,6 +64,17 @@ public class PlayerMovement : MonoBehaviour
     void OnEnable()
     {
         _inputReader.MoveEvent += OnMove;
+        _inputReader.JumpEvent += OnJump;
+        _inputReader.DashEvent += OnDash;
+        _inputReader.GrabEvent += OnGrab;
+    }
+
+    void OnDisable()
+    {
+        _inputReader.MoveEvent -= OnMove;
+        _inputReader.JumpEvent -= OnJump;
+        _inputReader.DashEvent -= OnDash;
+        _inputReader.GrabEvent -= OnGrab;
     }
 
     private void Start()
@@ -142,7 +153,7 @@ public class PlayerMovement : MonoBehaviour
                 rb.velocity += Vector2.up * Physics2D.gravity.y * lowJumpMult * Time.deltaTime;
             }
 
-            else if (Mathf.Abs(xDirection) > 0f && _jumpInput && isWallClose && !isGrounded)
+            else if (Mathf.Abs(_moveDir.x) > 0f && _jumpInput && isWallClose && !isGrounded)
             {
                 StartCoroutine(WallJump());
             }
@@ -167,15 +178,15 @@ public class PlayerMovement : MonoBehaviour
         // Running
         else if (!isWallGrabbed && !isDashing && !isWallJumping && !isClimbJumping)
         {
-            float addX = rb.velocity.x + xDirection * 1 / runAccTime * maxSpeed;
+            float addX = rb.velocity.x + _moveDir.x * 1 / runAccTime * maxSpeed;
             rb.velocity = new Vector2(addX, rb.velocity.y);
 
-            rb.velocity = new Vector2(Mathf.Min(Mathf.Abs(rb.velocity.x), maxSpeed * Mathf.Abs(xDirection) * Mathf.Sign(rb.velocity.x)), rb.velocity.y);
+            rb.velocity = new Vector2(Mathf.Min(Mathf.Abs(rb.velocity.x), maxSpeed * Mathf.Abs(_moveDir.x) * Mathf.Sign(rb.velocity.x)), rb.velocity.y);
 
             // Deceleration when Release the key or direction change.
-            if (xDirection == 0f || System.Math.Sign(xDirection) != System.Math.Sign(rb.velocity.x))
+            if (_moveDir.x == 0f || System.Math.Sign(_moveDir.x) != System.Math.Sign(rb.velocity.x))
             {
-                addX = rb.velocity.x + xDirection * 1 / runDecTime * maxSpeed;
+                addX = rb.velocity.x + _moveDir.x * 1 / runDecTime * maxSpeed;
                 rb.velocity = new Vector2(addX, rb.velocity.y);
 
                 rb.velocity = new Vector2(Mathf.Max(Mathf.Abs(rb.velocity.x), 0f), rb.velocity.y);
@@ -185,10 +196,10 @@ public class PlayerMovement : MonoBehaviour
         // Wall Climbing
         else if (isWallGrabbed)
         {
-            rb.velocity = new Vector2(0f, yDirection * maxClimbSpeed);
+            rb.velocity = new Vector2(0f, _moveDir.y * maxClimbSpeed);
 
             // Climbing up the wall reduces stamina fast.
-            if (yDirection > 0)
+            if (_moveDir.y > 0)
             {
                 staminaMinusMult = 2f;
             }
@@ -264,7 +275,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Flip()
     {
-        if (!isFacingRight && xDirection > 0f || isFacingRight && xDirection < 0f)
+        if (!isFacingRight && _moveDir.x > 0f || isFacingRight && _moveDir.x < 0f)
         {
             isFacingRight = !isFacingRight;
 
@@ -312,6 +323,7 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Dash()
     {
+        _dashInput = false;
         isDashAvailable = false;
         isDashing = true;
 
@@ -325,8 +337,8 @@ public class PlayerMovement : MonoBehaviour
             yield return null;
         }
 
-        float X = xDirection;
-        float Y = yDirection;
+        float X = _moveDir.x;
+        float Y = _moveDir.y;
         float diagDashMult = 1f;
         if (Mathf.Abs(X) > 0f && Mathf.Abs(Y) > 0f)
         {
@@ -370,7 +382,7 @@ public class PlayerMovement : MonoBehaviour
 
     void OnJump(bool isPressed) => _jumpInput = isPressed;
 
-    void OnDash() => _dashInput = true;
+    void OnDash(bool isPressed) => _dashInput = isPressed;
 
     void OnGrab(bool isPressed) => _grabInput = isPressed;
     #endregion

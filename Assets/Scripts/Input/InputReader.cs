@@ -10,7 +10,7 @@ public class InputReader : ScriptableObject
     public UnityAction<Vector2> MoveEvent = delegate { };
     public UnityAction<bool> JumpEvent = delegate { };
     public UnityAction<bool> GrabEvent = delegate { };
-    public UnityAction DashEvent = delegate { };
+    public UnityAction<bool> DashEvent = delegate { };
 
     GameInput gameInput;
 
@@ -73,7 +73,12 @@ public class InputReader : ScriptableObject
     {
         if (context.performed)
         {
-            DashEvent?.Invoke();
+            DashEvent?.Invoke(true);
+        }
+
+        if (context.canceled)
+        {
+            DashEvent?.Invoke(false);
         }
     }
 }
