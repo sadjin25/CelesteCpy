@@ -5,6 +5,7 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - _inputReader: {fileID: 11400000, guid: b56fed706163e1c4eba60106aa14421c, type: 2}
+  - _constVariables: {fileID: 11400000, guid: 5b7a52e1393b0a24fb761155eb795b99, type: 2}
   - rb: {instanceID: 0}
   - groundChkr: {instanceID: 0}
   - wallChkr: {instanceID: 0}

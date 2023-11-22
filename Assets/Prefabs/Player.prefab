@@ -195,18 +195,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _inputReader: {fileID: 11400000, guid: b56fed706163e1c4eba60106aa14421c, type: 2}
+  _constVariables: {fileID: 11400000, guid: 5b7a52e1393b0a24fb761155eb795b99, type: 2}
   rb: {fileID: 781204502290674230}
   groundChkr: {fileID: 6024772673881449029}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   wallChkr: {fileID: 6024772674399784104}
-  isPlayerTimeStopped: 0
-  _grabInput: 0
-  _jumpInput: 0
-  _dashInput: 0
-  stamina: 0
-  staminaMinusMult: 1
 --- !u!95 &781204502290674226
 Animator:
   serializedVersion: 5

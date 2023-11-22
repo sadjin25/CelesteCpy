@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] InputReader _inputReader;
+    [SerializeField] PlayerConstVariables _constVariables;
 
     public Rigidbody2D rb;
 
@@ -15,47 +16,32 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 wallChkrVec = new Vector2(0.2f, 1.5f);
 
     //------------------INPUTS--------------------------
-    private Vector2 _moveDir;
-    public bool _grabInput;
-    public bool _jumpInput;
-    public bool _dashInput;
+    Vector2 _moveDir;
+    bool _grabInput;
+    bool _jumpInput;
+    bool _dashInput;
     //-------------------STATES-------------------------
     bool _enableMovement = true;
 
-    private bool isFacingRight = true;
+    float stamina;
+    float staminaMinusMult = 1f;
 
-    private bool isGrounded;
+    // TODO: make it const
+    float playerDefaultGravity;
 
-    private bool isWallGrabbed;
-    private bool isWallClose;
-    private bool isWallJumping;
-    private bool isClimbJumping;
-    public float stamina;
-    public float staminaMinusMult = 1f;
-    private readonly float maxStamina = 7f;
-    private readonly float maxClimbSpeed = 3f;
-    private readonly float climbJumpStamina = 7 / 4f;
-    private readonly float minStaminaToClimbJump = 2f;
+    bool isFacingRight = true;
 
-    private readonly float maxSpeed = 10f;
-    // takes 6 frames to Max
-    private readonly float runAccTime = 6f;
-    // takes 3 frames to 0
-    private readonly float runDecTime = 3f;
+    bool isGrounded;
 
+    bool isWallGrabbed;
+    bool isWallClose;
+    bool isWallJumping;
+    bool isClimbJumping;
 
-    private bool isDashing;
-    private bool isDashAvailable;
-    private readonly float dashForce = 20f;
+    bool isDashing;
+    bool isDashAvailable;
 
-    // DANGER : This is NOT a READ ONLY.
-    private float playerDefaultGravity;
-    private float gravityMult = 1.5f;
-    // DANGER : This value should be MINUS.
-    public readonly float maxFallVel = -20f;
-    private float lowJumpMult = 1.5f;
-    private float jumpForce = 14f;
-
+    #region UNITY EVENTS
     void OnEnable()
     {
         _inputReader.MoveEvent += OnMove;
@@ -72,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
         _inputReader.GrabEvent -= OnGrab;
     }
 
-    private void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         playerDefaultGravity = rb.gravityScale;
@@ -96,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
     }
+    #endregion
 
     private void FallChk()
     {
@@ -108,9 +95,9 @@ public class PlayerMovement : MonoBehaviour
         {
             if (rb.velocity.y < 0 && !isGrounded)
             {
-                rb.velocity += Vector2.up * Physics2D.gravity.y * gravityMult * Time.deltaTime;
+                rb.velocity += Vector2.up * Physics2D.gravity.y * _constVariables.gravityMult * Time.deltaTime;
 
-                rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, maxFallVel));
+                rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y, _constVariables.maxFallVel));
             }
         }
     }
@@ -130,12 +117,12 @@ public class PlayerMovement : MonoBehaviour
         {
             if (_jumpInput && isGrounded)
             {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                rb.velocity = new Vector2(rb.velocity.x, _constVariables.jumpForce);
             }
 
             else if (!_jumpInput && rb.velocity.y > 0)
             {
-                rb.velocity += Vector2.up * Physics2D.gravity.y * lowJumpMult * Time.deltaTime;
+                rb.velocity += Vector2.up * Physics2D.gravity.y * _constVariables.lowJumpMult * Time.deltaTime;
             }
 
             else if (Mathf.Abs(_moveDir.x) > 0f && _jumpInput && isWallClose && !isGrounded)
@@ -144,7 +131,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        else if (isWallGrabbed && _jumpInput && stamina > minStaminaToClimbJump)
+        else if (isWallGrabbed && _jumpInput && stamina > _constVariables.minStaminaToClimbJump)
         {
             StartCoroutine(ClimbJump());
         }
@@ -163,15 +150,15 @@ public class PlayerMovement : MonoBehaviour
         // Running
         else if (!isWallGrabbed && !isDashing && !isWallJumping && !isClimbJumping)
         {
-            float addX = rb.velocity.x + _moveDir.x * 1 / runAccTime * maxSpeed;
+            float addX = rb.velocity.x + _moveDir.x * 1 / _constVariables.runAccTime * _constVariables.maxSpeed;
             rb.velocity = new Vector2(addX, rb.velocity.y);
 
-            rb.velocity = new Vector2(Mathf.Min(Mathf.Abs(rb.velocity.x), maxSpeed * Mathf.Abs(_moveDir.x) * Mathf.Sign(rb.velocity.x)), rb.velocity.y);
+            rb.velocity = new Vector2(Mathf.Min(Mathf.Abs(rb.velocity.x), _constVariables.maxSpeed * Mathf.Abs(_moveDir.x) * Mathf.Sign(rb.velocity.x)), rb.velocity.y);
 
             // Deceleration when Release the key or direction change.
             if (_moveDir.x == 0f || System.Math.Sign(_moveDir.x) != System.Math.Sign(rb.velocity.x))
             {
-                addX = rb.velocity.x + _moveDir.x * 1 / runDecTime * maxSpeed;
+                addX = rb.velocity.x + _moveDir.x * 1 / _constVariables.runDecTime * _constVariables.maxSpeed;
                 rb.velocity = new Vector2(addX, rb.velocity.y);
 
                 rb.velocity = new Vector2(Mathf.Max(Mathf.Abs(rb.velocity.x), 0f), rb.velocity.y);
@@ -181,7 +168,7 @@ public class PlayerMovement : MonoBehaviour
         // Wall Climbing
         else if (isWallGrabbed)
         {
-            rb.velocity = new Vector2(0f, _moveDir.y * maxClimbSpeed);
+            rb.velocity = new Vector2(0f, _moveDir.y * _constVariables.maxClimbSpeed);
 
             // Climbing up the wall reduces stamina fast.
             if (_moveDir.y > 0)
@@ -205,7 +192,7 @@ public class PlayerMovement : MonoBehaviour
         {
             // can hold wall for (x)f seconds.
             // TODO : make Refill() func.
-            stamina = maxStamina;
+            stamina = _constVariables.maxStamina;
             isDashAvailable = true;
         }
     }
@@ -275,7 +262,7 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = Vector2.zero;
         isWallJumping = true;
 
-        Vector2 jumpVec = new Vector2(maxSpeed, jumpForce);
+        Vector2 jumpVec = new Vector2(_constVariables.maxSpeed, _constVariables.jumpForce);
 
         if (isFacingRight)
         {
@@ -329,7 +316,7 @@ public class PlayerMovement : MonoBehaviour
         {
             diagDashMult = 0.707f;
         }
-        rb.velocity = new Vector2(X * dashForce * diagDashMult, Y * dashForce * diagDashMult);
+        rb.velocity = new Vector2(X * _constVariables.dashForce * diagDashMult, Y * _constVariables.dashForce * diagDashMult);
 
         // Dashing for 12 frames.
         frame = 12;
@@ -344,12 +331,12 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator ClimbJump()
     {
-        stamina -= climbJumpStamina;
+        stamina -= _constVariables.climbJumpStamina;
         isClimbJumping = true;
         rb.velocity = Vector2.zero;
         rb.gravityScale = playerDefaultGravity;
 
-        rb.velocity = new Vector2(0f, jumpForce);
+        rb.velocity = new Vector2(0f, _constVariables.jumpForce);
 
         while (!IsFalling())
         {
