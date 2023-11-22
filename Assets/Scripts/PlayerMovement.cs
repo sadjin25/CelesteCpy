@@ -10,7 +10,6 @@ public class PlayerMovement : MonoBehaviour
 
     public static PlayerMovement playerMovement;
     public Rigidbody2D rb;
-    private Collider2D playerCollider;
 
     [SerializeField] private Transform groundChkr;
     [SerializeField] private LayerMask groundLayer;
@@ -80,7 +79,6 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        playerCollider = GetComponent<Collider2D>();
         playerDefaultGravity = rb.gravityScale;
 
         // Singleton Init
