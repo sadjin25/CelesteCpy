@@ -68,13 +68,13 @@ public class GameManager : MonoBehaviour
     public void StopGameTimeFlow()
     {
         Time.timeScale = 0f;
-        PlayerMovement.playerMovement.isPlayerTimeStopped = true;
+        Player._Instance.ActivateGameStop();
     }
 
     public void ResumeGameTimeFlow()
     {
         Time.timeScale = 1f;
-        PlayerMovement.playerMovement.isPlayerTimeStopped = false;
+        Player._Instance.DeactivateGameStop();
     }
 
     public void GetInputEscape(InputAction.CallbackContext context)

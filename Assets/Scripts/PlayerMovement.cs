@@ -1,14 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] InputReader _inputReader;
 
-    public static PlayerMovement playerMovement;
     public Rigidbody2D rb;
 
     [SerializeField] private Transform groundChkr;
@@ -17,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform wallChkr;
     private Vector2 wallChkrVec = new Vector2(0.2f, 1.5f);
 
-    public bool isPlayerTimeStopped;
+    bool _enableMovement = true;
 
     //------------------INPUTS--------------------------
     private Vector2 _moveDir;
@@ -80,34 +77,25 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         playerDefaultGravity = rb.gravityScale;
-
-        // Singleton Init
-        if (playerMovement == null)
-        {
-            playerMovement = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
     }
 
     void Update()
     {
-        if (!Player.player.isDead && !isPlayerTimeStopped)
-        {
-            GroundChk();
-            WallChk();
-            JumpChk();
-            FallChk();
-            StaminaControl();
-            Movement();
+        if (!_enableMovement) return;
+        if (Player._Instance.isDead) return;
 
-            if (!isWallGrabbed)
-            {
-                Flip();
-            }
+        GroundChk();
+        WallChk();
+        JumpChk();
+        FallChk();
+        StaminaControl();
+        Movement();
+
+        if (!isWallGrabbed)
+        {
+            Flip();
         }
+
     }
 
     private void FallChk()
@@ -384,4 +372,14 @@ public class PlayerMovement : MonoBehaviour
 
     void OnGrab(bool isPressed) => _grabInput = isPressed;
     #endregion
+
+    public void DisableMovement()
+    {
+        _enableMovement = false;
+    }
+
+    public void EnableMovement()
+    {
+        _enableMovement = true;
+    }
 }

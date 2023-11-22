@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public static Player player;
+    public static Player _Instance;
+
+    PlayerMovement _playerMovement;
 
     private Animator anim;
 
@@ -24,15 +26,16 @@ public class Player : MonoBehaviour
     }
 
     private bool isGameOver = false;
+    bool _isGameStopped = false;
 
     public int MelonCnt;
 
     void Start()
     {
         // Singleton Init
-        if (player == null)
+        if (_Instance == null)
         {
-            player = this;
+            _Instance = this;
         }
 
         else
@@ -41,6 +44,7 @@ public class Player : MonoBehaviour
         }
 
         anim = GetComponent<Animator>();
+        _playerMovement = GetComponent<PlayerMovement>();
     }
 
     void FixedUpdate()
@@ -58,7 +62,7 @@ public class Player : MonoBehaviour
     {
         if (isDead && !isGameOver)
         {
-            PlayerMovement.playerMovement.rb.velocity = Vector2.zero;
+            _playerMovement.rb.velocity = Vector2.zero;
             isGameOver = true;
 
             GameManager.Instance.LoadMap();
@@ -68,7 +72,7 @@ public class Player : MonoBehaviour
     private void AnimTransition()
     {
         // Running
-        if (Mathf.Abs(PlayerMovement.playerMovement.rb.velocity.x) > 0.1f)
+        if (Mathf.Abs(_playerMovement.rb.velocity.x) > 0.1f)
         {
             State = SpriteState.running;
         }
@@ -79,13 +83,13 @@ public class Player : MonoBehaviour
         }
 
         // Jumping
-        if (PlayerMovement.playerMovement.IsJumping())
+        if (_playerMovement.IsJumping())
         {
             State = SpriteState.jumping;
         }
 
         // Falling
-        else if (PlayerMovement.playerMovement.IsFalling())
+        else if (_playerMovement.IsFalling())
         {
             State = SpriteState.falling;
         }
@@ -110,6 +114,18 @@ public class Player : MonoBehaviour
         {
             isDead = true;
         }
+    }
+
+    public void ActivateGameStop()
+    {
+        _isGameStopped = true;
+        _playerMovement.DisableMovement();
+    }
+
+    public void DeactivateGameStop()
+    {
+        _isGameStopped = false;
+        _playerMovement.EnableMovement();
     }
 
 }
