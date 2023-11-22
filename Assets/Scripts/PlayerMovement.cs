@@ -14,14 +14,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform wallChkr;
     private Vector2 wallChkrVec = new Vector2(0.2f, 1.5f);
 
-    bool _enableMovement = true;
-
     //------------------INPUTS--------------------------
     private Vector2 _moveDir;
     public bool _grabInput;
     public bool _jumpInput;
     public bool _dashInput;
     //-------------------STATES-------------------------
+    bool _enableMovement = true;
 
     private bool isFacingRight = true;
 
